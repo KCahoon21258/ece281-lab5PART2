@@ -38,8 +38,21 @@ entity controller_fsm is
 end controller_fsm;
 
 architecture FSM of controller_fsm is
-
+ 
 begin
-
-
+    process(i_reset, i_adv)
+    begin   
+        if i_reset = '1' then 
+            w_cycle <= "0001"; 
+        elsif rising_edge(i_adv) then
+            case w_cycle is
+                when "0001" => w_cycle <= "0010"; 
+                when "0010" => w_cycle <= "0100"; 
+                when "0100" => w_cycle <= "1000";
+                when "1000" => w_cycle <= "0001"; 
+                when others => w_cycle <= "0001";
+           end case;
+      end if; 
+    end process;
+    o_cycle <= w_cycle;
 end FSM;
