@@ -95,7 +95,7 @@ port(
     i_B: in std_logic_vector (7 downto 0); 
     i_op: in std_logic_vector (2 downto 0);
     o_result: out std_logic_vector (7 downto 0);  
-    o_flags: in std_logic_vector (3 downto 0)
+    o_flags: out std_logic_vector (3 downto 0)
     ); 
     end component; 
 component twos_comp 
@@ -109,12 +109,15 @@ component twos_comp
         end component;
         
 component TDM4
+    generic (
+            K_WIDTH : integer := 4
+        );
     port(
-        i_D3: in std_logic_vector (3 downto 0); 
-        i_D2 : in std_logic_vector (3 downto 0); 
-        i_D1: in std_logic_vector (3 downto 0); 
-        i_D0: in std_logic_vector (3 downto 0); 
-        o_data: out std_logic_vector (3 downto 0); 
+        i_D3: in std_logic_vector (K_WIDTH-1 downto 0); 
+        i_D2 : in std_logic_vector (K_WIDTH-1 downto 0); 
+        i_D1: in std_logic_vector (K_WIDTH-1 downto 0); 
+        i_D0: in std_logic_vector (K_WIDTH-1 downto 0); 
+        o_data: out std_logic_vector (K_WIDTH-1 downto 0); 
         o_sel: out std_logic_vector (3 downto 0); 
         i_clk : in std_logic; 
         i_reset: in std_logic  
@@ -204,14 +207,34 @@ port map(
     o_ones => w_ones); 
     
 --TDM DISPLAY--
-    tdm_inst: 
-             
-        
-      
-	
-	
-	-- CONCURRENT STATEMENTS ----------------------------
-	
+    tdm_inst: TDM4
+    generic map (K_WIDTH =>4)
+    port map(
+             i_D3 => x"0", 
+             i_D2 => w_hundreds, 
+             i_D1 => w_tens, 
+             i_D0 => w_ones, 
+             o_data => w_Hex, 
+             o_sel => w_sel, 
+             i_clk => w_slow_clk,
+             i_reset => btnU
+             );
+--7seg decoder--
+    seg_inst : sevenseg_decoder
+        port map(
+            i_hex => w_Hex, 
+            o_seg_n => w_seg
+            );
+--DISPLAY LOGIC--
+    seg <= w_seg when (w_sel /= "1111") else "1111111";
+    an <= "1111" when w_cycle = "0001" else w_sel; 
+    
+--LEDSS--
+    led(3 downto 0) <= w_cycle; 
+    led(15 downto 12) <= alu_flags; 
+    led(11 downto 4) <= (others => '0'); 
+                               
+       	
 	
 	
 end top_basys3_arch;
