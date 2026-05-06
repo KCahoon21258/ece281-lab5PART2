@@ -72,12 +72,11 @@ signal w_seg : std_logic_vector (6 downto 0);
 --Comps
 component controller_fsm 
     port(
-        i_clk : in std_logic;
-        i_reset: in std_logic;
-        i_btnC: in std_logic; 
-        o_cycle: out std_logic_vector (3 downto 0));
-        
-        end component;
+        i_reset : in std_logic;
+        i_adv   : in std_logic;
+        o_cycle : out std_logic_vector (3 downto 0)
+    );
+end component;
         
 component clock_divider
     generic(K_DIV : integer := 2); 
@@ -144,21 +143,22 @@ clkdiv_inst : clock_divider
 process(clk)
 begin
     if rising_edge(clk) then 
+        w_btnC_prev <= btnC;
+
         if btnC = '1' and w_btnC_prev = '0' then 
-            w_adv <= '1'; 
-           else
-            w_adv <= '0'; 
-           end if;
-        w_btnC_prev <= btnC; 
-        end if; 
-        end process;
+            w_adv <= '1';
+        else
+            w_adv <= '0';
+        end if;
+    end if;
+end process;
 --FSM--
-fsm_inst: controller_fsm
-    port map(
-        i_clk => w_slow_clk, 
-        i_reset => btnU, 
-        i_btnC => w_adv,
-        o_cycle => w_cycle ); 
+fsm_inst: controller_fsm    
+port map(
+    i_reset => btnU,
+    i_adv   => w_adv,
+    o_cycle => w_cycle
+);
 --Operand registers--
 process(w_slow_clk)
     begin
