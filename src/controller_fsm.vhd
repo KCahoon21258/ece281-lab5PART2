@@ -38,7 +38,7 @@ entity controller_fsm is
 end controller_fsm;
 
 architecture FSM of controller_fsm is
- 
+signal w_cycle: STD_LOGIC_VECTOR (3 downto 0);
 begin
     process(i_reset, i_adv)
     begin   
